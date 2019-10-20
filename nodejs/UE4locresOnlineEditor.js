@@ -1,5 +1,5 @@
 ﻿
-// UE4locresOnlineEditor v1.1, by Kly_Men_COmpany!
+// UE4locresOnlineEditor v1.2, by Kly_Men_COmpany!
 
 "use strict";
 
@@ -611,6 +611,10 @@ function locres_translation(files){
         else{
           bro = pool[part.key];
           bro.line = trans_join(bro.line,part.line);
+          if(bro.id!=part.id){
+            part.line = bro.line;
+            return true;
+          }
           return false;
         }
         return true;
