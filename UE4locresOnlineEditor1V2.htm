@@ -1,0 +1,1161 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>UE4 .locres online editor v1.2</title>
+<style>
+body, html, div, center, table, h1, h2{
+  margin: 0;
+  padding: 0;
+}
+body, html{
+  background: #f0f0f0;
+  color: #101010;
+  font: normal 16pt Arial;
+}
+h1{
+  font-size: 22pt;
+}
+h2{
+  font-size: 18pt;
+}
+hr{
+  padding: 0;
+  margin: 12pt;
+  border-color: white;
+  border-width: 2px;
+}
+center{
+  margin: 14pt;
+}
+table{
+  width: 100%;
+  border: 0;
+  border-collapse: collapse;
+  font: normal 16pt Arial;
+}
+table td, table th{
+  border: 2px solid silver;
+  padding: 6pt;
+  text-align: center;
+}
+button{
+  background: white;
+  border: 3px ridge gray;
+  font: bold 14pt Arial;
+  margin: 4pt;
+  padding: 2pt 6pt;
+}
+button:hover{
+  border: 3px double gray;
+  cursor: pointer;
+}
+button:active{
+  background: silver;
+  border: 3px groove gray;
+}
+input[type="file"]{
+  width: 90%;
+  height: 48pt;
+  text-align: center;
+  border: 4px dashed black;
+  margin: 24pt;
+  padding: 12pt;
+}
+input[type="file"]:hover{
+  border: 4px double black;
+  cursor: pointer;
+}
+input[data-drop], input[type="file"]:active{
+  border: 4px double white;
+}
+em{
+  margin: 4pt;
+  padding: 4pt;
+}
+#my_fixed{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  background: black;
+  opacity: 0;
+  display: none;
+  cursor: not-allowed;
+}
+textarea{
+  width: 95%;
+  height: 512px;
+  font: normal 16pt Courier New;
+  color: black;
+  background: white;
+}
+input[type="text"]{
+  font: bold 14pt Courier New;
+  padding: 4pt;
+  margin: 6pt;
+  width: 98%;
+}
+p{
+  text-indent: 16pt;
+  text-align: left;
+  font: normal 14pt Arial;
+}
+</style>
+</head>
+<body>
+<div id="my_fixed"></div>
+<center>
+<h1>UE4 .locres online editor v1.2, by Kly_Men_COmpany!</h1>
+<a href="https://github.com/klimaleksus/UE4-locres-Online-Editor">(Return to repo)</a>
+<hr>
+<input type="file" id="my_file" multiple ondragleave="this.removeAttribute('data-drop');" title="Open or drag-and-drop .locres files here. Note that this input files will be cleared immediately, but your file will go to the table below.">
+<table>
+<tr id="new_row"><th>Binary files:</th><th>Size:</th><th><button id="new_all" title="Performs Load action on each binary file in the list. Is successful, also performs Free action.">Load and free all</button></th></tr>
+</table>
+<hr>
+<table>
+<tr id="loc_row"><th>Loaded .locres:</th><th>Chunks: Translated / Texts</th><th><button id="loc_del" title="Performs Delete action on each loaded .locres file, clears the table.">Delete all</button></th></tr>
+</table>
+<hr>
+<table><tr>
+<td><button id="my_reparse" title="Performs text import and text export without creating an explicit locres in memory. Useful to quickly pretty-print your stuff.">Reparse text</button></td>
+<td><button id="my_import" title="Parses your text and creates .locres in memory. If an entry with the same name is already exists, it will be replaced entirely.">Import from text</button></td>
+<td><button id="my_export" title="Quickly converts everything you got to textual form. Better is to copy results to any other text editor and work there.">Export all to text</button></td>
+</tr></table>
+<textarea id="my_text" wrap="off" spellcheck="false"></textarea>
+<table><tr>
+<td><button id="my_orig" title="If any text string in your current data in textbox have more than one translation/line – the first one will be deleted. Useful for committing your translation for production.">Remove original</button></td>
+<td><button id="my_trans" title="As previous, but removes the last line from each string. Note that a game could display wrong text, if any of your strings have more than one translation/line.">Remove translation</button></td>
+<td><button id="my_stat" title="Separates all your texts by the number of translation/lines. This way you can find out all non-translated strings. Reparsing such separation will collapse it back.">Translation stats</button></td>
+<td><button id="my_split" title="Separates your text by each translation, so you can get clean parts for the language/culture you used. As previous, reparsing this stuff will collapse it too.">Split translation</button></td>
+</tr></table>
+<table><tr>
+</tr></table>
+<hr>
+<h2>Инструкция:</h2>
+<p>
+Парсер для расшифровки и пересоздания .locres файлов из-под Unreal Engine 4.
+<p>
+<p>
+Вы сможете загрузить файл сюда и получить текст из него. Поработать с этим текстом в любом другом месте, потом вставить его сюда – и собрать обратно в бинарный файл! Вам даже не потребуется хранить копию оригинала, ведь результат всегда воссоздаётся заново.
+<p>
+<p>
+Для начала перетащите .locres файлы в верхнее поле, или нажмите на него, чтобы выбрать файлы в диалоговом окне.
+<p>
+Обратите внимание, что поле СРАЗУ очищается, но при этом – ваши файлы появляются в таблице ниже.
+<p>
+<p>
+В первом столбце – имя, под которым зафиксирован каждый файл: это ссылка, нажмите чтобы непосредственно «скачать» любой из файлов обратно.
+<p>
+Файлы выбраны, но ещё не расшифрованы. Можете загрузить только нужные вам сейчас (по кнопке «Load!»), или сразу все через кнопку «Load and free all» – тогда успешно загруженные будут сразу удалены из верхней таблицы (ручное удаление – по кнопке «Free»).
+<p>
+<p>
+Теперь, успешно загруженные и распарсенные файлы попадают во вторую таблицу. В первом столбце можно изменить их названия (но здесь все имена должны быть уникальными, в отличие от верхней таблицы).
+<p>
+Кнопка «Save!» воссоздаст бинарный файл из того, что есть в памяти – и поместит его опять в первую таблицу. Вообще говоря, файл будет другим, но игра должна воспринимать его как оригинальный. Нажмите на имя-ссылку, чтобы сохранить результат в настоящий файл.
+<p>
+Кнопка «Edit» переведёт файл в памяти в текстовое представление, и выведет его в нижнее поле. Можно преобразовать так сразу все открытые файлы второй таблицы, нажмите «Export all to text».
+<p>
+Кнопки «Delete» (или «Delete all») удаляют выбранные файлы из памяти (или сразу все).
+<p>
+<p>
+После работы с текстом нажмите кнопку «Import from text» – тогда все определённые в вашем тексте файлы будут записаны в память во вторую таблицу, заменяя вхождения с теми же именами.
+<p>
+Чтобы «переварить» введённый текст и просто отобразить его заново – поможет кнопка «Reparse text» (это как импорт и экспорт, но без промежуточного сохранения).
+<p>
+<p>
+Текст экспортируется вот в таком формате:
+<p>
+<br>&lt;FILE&gt; "имя_файла.locres" (двоичный_заголовок)
+<br>&lt;NAME&gt; "название_блока_строк":
+<br>&lt;TEXT&gt; "код_идентификатор" (хэш_оригинала)
+<br>"строка текста"
+<p>
+– здесь часть &lt;FILE&gt; представляет собой всё содержимое одного файла, и ему принадлежит всё, что идёт ниже до следующего &lt;FILE&gt;. Часть &lt;NAME&gt; – это «namespace» блока строк Unreal Engine, иногда назван пустой строкой; ему принадлежит всё ниже до следующего &lt;NAME&gt; или &lt;FILE&gt;.
+<p>
+Часть &lt;TEXT&gt; – это описание одной строки в игре, оно однозначно определяется своим кодом-идентификатором (ну и блоком, в котором расположено). Хэш оригинала нужен игре для того, чтобы отвергать такие локализованные строки, у которых он перестал совпадать с оригинальной строкой – поэтому вы не должны изменять эти хэши (как и коды, имена блоков и двоичные заголовки файлов – во время работы не трогайте их!)
+<p>
+После поля &lt;TEXT&gt; записывается сама текстовая строка, обязательно в кавычках. Однако, когда несколько разных ключей в одном блоке фактически используют тот же самый текст – он будет выводиться единожды, после нескольких &lt;TEXT&gt; подряд. В принципе, вы можете разделить их, и вставить туда другие варианты локализации этого текста.
+<p>
+<p>
+Эта программа работает со строками как с массивами «переводов» – это значит, что хотя игра и хранит в каждой «строке» лишь одну строчку текста – здесь можно присвоить одной и той же строке несколько «переводов». Например, первым переводом желательно оставить «оригинал», чтобы с текстом можно было работать как с набором оригинал+перевод.
+<p>
+Вот как это выглядит: во-первых, вы можете принудительно записать несколько вариантов текста для одной и той же строки (друг под другом, в кавычках). Во-вторых, если вдруг в вашем тексте оказались несколько таких строк, у которых совпали и ключи, и блоки, и имена файлов – то они схлопываются в единое вхождение, с объединёнными вашими текстами (и вообще, если у вас будут одинаковые названия блоков, файлов или ключи – то их содержимое в любом случае будут объединено, но не обязательно так схлопнуто, если что-то всё же отличалось).
+<p>
+<p>
+Три кнопки под текстовым полем помогут вам работать с такими вот переводами. Все они считывают текущее содержимое текстового поля, и выводят результат обработки обратно в него:
+<p>
+Кнопка «Remove original» убирает первую строку их тех текстов, где их было больше одной. Соответственно, «Remove translation» – убирает последнюю строку.
+<p>
+Кнопка «Translation stats» разделяет текущий документ на несколько файлов: в первом будут только те тексты, у которых была только одна строка в переводах; во втором – все  тексты с двумя строками, и так далее. При этом, все блоки корректно разделяются по этим файлам (кстати, у них будут одинаковые имена, чтобы вы могли быстро вернуть всё назад, той же «Reparse text», например), но вообще – лучше делайте эту процедуру только при единственном открытом файле, чтобы не запутаться.
+<p>
+Кнопка «Split translation» тоже разделяет файл на несколько, но в этот раз – первый будет содержать все тексты, в которых была в наличии первая строка (то есть вообще все) и только её, второй – только те строки, у которых была вторая строка (а тексты лишь с одной сточкой будут отсутствовать) и тоже только её, и так далее. Опять же, при общем считывании результата – вы получите то, что у вас было; эта команда лишь помогает отделить переводы друг от друга.
+<p>
+<p>
+Если вы сохраните файл, в котором были переводы (то есть тексты с несколькими строками) – то в игру он будет вшит как конкатенация ваших переводов через символ \0 (двоичный нуль), снизу вверх, то есть ваш самый последний перевод будет начинать фразу, а оригинал – её заканчивать. Вообще говоря, это некорректный вид текста, и игра отреагирует на него неправильно.
+<p>
+Поэтому, сохраняйте в бинарные файлы свои переводы только для удобства, а при запаковке в игру – удаляйте все оригиналы из них (нажмите «Remove original» несколько раз, если у вас было по три строки и больше). Эта возможность добовлять переводы нужна в первую очередь для удобства переводчика! (Плюс, вы всегда сможете вернуть переводы на место, если вставите в текстовое поле файл оригинала, и файл финального перевода – когда укажите им одинаковые имена после &lt;FILE&gt;).
+<p>
+<p>
+Строки записываются в кавычках, чтобы вы не беспокоились о пробелах на концах. Программа экранирует следующие символы: переносы строк: &lt;cr&gt;, &lt;lf&gt; и &lt;cf&gt; (&lt;cr&gt;+&lt;lf&gt;); табулятор &lt;tab&gt;; двойная кавычка &lt;q&gt;, нуль-байт &lt;nul&gt; (только в названиях, ведь в текстах он разделяет переводы); знаки больше и меньше &lt;gt&gt; и &lt;lt&gt; (ведь они и используются для всего остального экранирования).
+<p>
+Создаваемые бинарные .locres файлы имеют смешанную кодировку: UTF-8 для тех текстов, которые содержат только базовую латиницу ASCII (то есть дополнительные наборы utf8 при этом не используются), и UTF-16 для тех, в которых встречаются прочие символы юникода.
+<p>
+<hr>
+</center>
+
+<script>
+"use strict";
+
+if(!window.parseInt)
+  window.parseInt = Number.parseInt;
+var URL = window.URL || window.webkitURL;
+  
+function nodrop(e){
+  e = (e||event);
+  if(e.target&&!e.target.disabled){
+    if(e.target.tagName=='INPUT')
+      if(e.target.files){
+        if(e.type=='drop')
+          e.target.removeAttribute('data-drop');
+        else
+          e.target.setAttribute('data-drop',true);
+        return true;
+      }
+  }
+  e.preventDefault();
+  if(e.dataTransfer){
+    e.dataTransfer.effectAllowed = 'none';
+    e.dataTransfer.dropEffect = 'none';
+  }
+  return false;
+};
+
+function GEBI(id){
+  return document.getElementById(id);
+};
+
+var my_file = GEBI('my_file');
+
+window.addEventListener('dragover',nodrop,false);
+window.addEventListener('drop',nodrop,false);
+
+var my_fixed = GEBI('my_fixed');
+
+function stopfix(how){
+  if(!how)
+    my_fixed.style.display = 'none';
+  else
+    my_fixed.style.display = 'block';
+};
+
+var my_probe = GEBI('my_probe');
+var my_text = GEBI('my_text');
+var my_imp = GEBI('my_imp');
+var new_row = GEBI('new_row');
+var new_all = GEBI('new_all');
+
+var loc_del = GEBI('loc_del');
+var loc_row = GEBI('loc_row');
+
+var my_reparse = GEBI('my_reparse');
+var my_import = GEBI('my_import');
+var my_export = GEBI('my_export');
+
+my_file.value = '';
+my_text.value = '';
+
+my_file.addEventListener('change',function(e){
+  for(var i=0,n=my_file.files.length; i<n; i++)
+    add_file(my_file.files[i],false);
+  my_file.value = '';
+});
+
+new_all.addEventListener('click',function(e){
+  stopfix(true);
+  var bins = [];
+  for(var key in binary_files)
+    if(key!='index')
+      bins.push(binary_files[key]);
+  next(0);
+  function next(i){
+    if(i>=bins.length)
+      return stopfix(false);
+    bin_load(bins[i],function(res){
+      if(res)
+        bin_free(bins[i]);
+      next(i+1);
+    });  
+  };
+});
+
+var binary_files = {index:0};
+
+function add_file(file,from){
+  var td,a,b;
+  var em = document.createElement('em');
+  var tr = document.createElement('tr');
+    var bin = {
+    index: ++binary_files.index,
+    url: URL.createObjectURL(file),
+    name: file.name,
+    size: file.size,
+    file: file,
+    row: tr,
+    status: em,
+  };
+  binary_files['bin_'+bin.index] = bin;
+  a = document.createElement('a');
+  a.textContent = bin.name;
+  a.title = 'Click here to save this file on your computer as a real binary file.';
+  a.href = bin.url;
+  a.download = bin.name;
+  td = document.createElement('td');
+  td.appendChild(a);
+  tr.appendChild(td);
+  td = document.createElement('td');
+  td.textContent = bin.size;
+  tr.appendChild(td);
+  td = document.createElement('td');
+  b = document.createElement('button');
+  b.textContent = 'Load!';
+  b.title = 'Converts binary file to array of text in memory. If successful, you will get an entry in the table below. Identical file names will be replaced, but you can rename stuff later.';
+  b.onclick = bin_load.bind(null,bin,null);
+  td.appendChild(b);
+  em.textContent = from ? '(YOUR)' : '(new)';
+  td.appendChild(em);
+  b = document.createElement('button');
+  b.textContent = 'Free';
+  b.title = 'Removes this file from browser memory. Note that you could have several files with the same name in this table, so explicit deleting is required to keep things clean.';
+  b.onclick = bin_free.bind(null,bin);
+  td.appendChild(b);
+  tr.appendChild(td);
+  new_row.parentNode.appendChild(tr);
+};
+
+function bin_load(bin,cb){
+  bin.status.textContent = '[...]';
+  if(!cb)
+    stopfix(true);
+  locres_load(bin.file,function(locres){
+    bin.status.textContent = locres ? 'ok' : 'ERROR!';
+    add_loc(locres);
+    if(cb)
+      cb(!!locres);
+    else
+      stopfix(false);
+  });
+};
+
+function bin_free(bin){
+  URL.revokeObjectURL(bin.url);
+  delete binary_files['bin_'+bin.index];
+  bin.row.outerHTML = '';
+};
+
+var locres_opened = Object.create(null);
+
+function add_loc(locres){
+  if(!locres)
+    return false;
+  if(locres_opened[locres.name])
+    loc_free(locres_opened[locres.name]);
+  var trans = 0;
+  var lines = 0;
+  locres.chunks.forEach(function(chunk){
+    lines += chunk.parts.length;
+    chunk.parts.forEach(function(part){
+      if(part.line.indexOf('\0')>=0)
+        trans++;
+    });
+  });
+  var td,a,b,span,input;
+  var em = document.createElement('em');
+  var tr = document.createElement('tr');
+    var loc = {
+    name: locres.name,
+    locres: locres,
+    chunks: locres.chunks.length,
+    trans: trans,
+    lines: lines,
+    row: tr,
+  };
+  locres_opened[locres.name] = loc;
+  td = document.createElement('td');
+  input = document.createElement('input');
+  input.type = 'text';
+  input.value = loc.name;
+  input.title = 'You can change the filename here, it is saved automatically. You cannot rename to empty string or to any existing file.';
+  input.oninput = loc_rename.bind(input,loc);
+  input.onblur = loc_blur.bind(input,loc);
+  td.appendChild(input);
+  tr.appendChild(td);
+  td = document.createElement('td');
+  span = document.createElement('span');
+  span.textContent = ''+loc.chunks+': '+loc.trans+' / '+loc.lines+' ';
+  td.appendChild(span);
+  b = document.createElement('button');
+  b.textContent = 'Save!';
+  b.title = 'Converts this .locres to a binary representation, which should be compatible with Unreal Engine. The result will go to the table above, where you can download it as a file.';
+  b.onclick = loc_save.bind(null,loc);
+  td.appendChild(b);
+  tr.appendChild(td);
+  td = document.createElement('td');
+  b = document.createElement('button');
+  b.textContent = 'Edit';
+  b.title = 'Converts only this .locres to textual representation. The result is printed to the textbox below, replacing it contents. While working with than text, you no longer need an original locres anymore.';
+  b.onclick = loc_load.bind(null,loc);
+  td.appendChild(b);
+  b = document.createElement('button');
+  b.textContent = 'Delete';
+  b.title = 'Deletes this loaded locres. In this table you cannot have files with identical names, but you can rename anything at will. All data is stored only in session memory, and will disappear after page reload anyway.';
+  b.onclick = loc_free.bind(null,loc);
+  td.appendChild(b);
+  tr.appendChild(td);
+  loc_row.parentNode.appendChild(tr);
+  return false;
+};
+
+loc_del.addEventListener('click',function(){
+  var locs = [];
+  for(var key in locres_opened)
+    locs.push(locres_opened[key]);
+  locs.forEach(function(loc){
+    loc_free(loc);
+  });
+});
+
+function loc_rename(loc){
+  if(locres_opened[this.value] || !this.value.trim())
+    return;  
+  delete locres_opened[loc.name];
+  loc.name = this.value;
+  loc.locres.name = this.value;
+  locres_opened[loc.name] = loc;
+};
+
+function loc_blur(loc){
+  this.value = loc.name;
+};
+
+function loc_load(loc){
+  my_text.value = locres_export(loc.locres);
+  my_text.select();
+  my_text.focus();
+};
+
+function loc_save(loc){
+  add_file(locres_save(loc.locres),true);
+};
+
+function loc_free(loc){
+  loc.row.outerHTML = '';
+  delete locres_opened[loc.name];
+};
+
+my_reparse.addEventListener('click',function(){
+  var text = my_text.value;
+  my_text.value = '';
+  var have = '';
+  locres_import(text).forEach(function(locres){
+    have += locres_export(locres);
+  });
+  my_text.value = have;
+  my_text.select();
+  my_text.focus();
+});
+
+my_import.addEventListener('click',function(){
+  locres_import(my_text.value).forEach(function(locres){
+    add_loc(locres);
+  });
+});
+
+my_export.addEventListener('click',function(){
+  var text = '';
+  for(var loc in locres_opened)
+    text += locres_export(locres_opened[loc].locres);
+  my_text.value = text;
+  my_text.select();
+  my_text.focus();
+});
+
+function trans_all(e){
+  var text = '';
+  locres_import(my_text.value).forEach(function(locres){
+    switch(e.target.id){
+      case 'my_orig':
+        locres_move(locres,true);
+        text += locres_export(locres);
+      break;
+      case 'my_trans':
+        locres_move(locres,false);
+        text += locres_export(locres);
+      break;
+      case 'my_stat':
+        text += locres_stats(locres,false);
+      break;
+      case 'my_split':
+        text += locres_stats(locres,true);
+      break;
+      default:
+        throw e.target.id;
+    }
+  });
+  my_text.value = text;
+  my_text.select();
+  my_text.focus();
+};
+
+GEBI('my_orig').addEventListener('click',trans_all);
+GEBI('my_trans').addEventListener('click',trans_all);
+GEBI('my_stat').addEventListener('click',trans_all);
+GEBI('my_split').addEventListener('click',trans_all);
+
+function locres_move(locres,orig){
+  locres.chunks.forEach(function(chunk){
+    chunk.parts.forEach(function(part){
+      var arr = trans_export(part.line);
+      if(arr.length<2)
+        return;
+      if(orig)
+        arr.shift();
+      else
+        arr.pop();
+      part.line = trans_import(arr);        
+    });
+  });
+};
+
+function locres_stats(locres,split){
+  var i,next;
+  var text = '';
+  i = 0;
+  locres.oldchunks = locres.chunks;
+  locres.oldchunks.forEach(function(chunk){
+    chunk.oldparts = chunk.parts;
+    chunk.parts.forEach(function(part){
+      part.oldline = part.line;
+    });
+  });
+  while(i<Infinity){
+    next = Infinity;
+    var mychunks = [];
+    locres.oldchunks.forEach(function(chunk){
+      var myparts = [];
+      chunk.oldparts.forEach(function(part){
+        var arr = trans_export(part.line);
+        if(arr.length>i&&arr.length<next)
+          next = arr.length;
+        if(split){
+          if(arr.length>i){
+            part.line = arr[i];
+            myparts.push(part);
+          }
+        }else{
+          if(arr.length==i)
+            myparts.push(part);
+        }
+      });
+      chunk.parts = myparts;
+      if(myparts.length)
+        mychunks.push(chunk);
+    });
+    locres.chunks = mychunks;
+    i = next;
+    if(mychunks.length)
+      text += locres_export(locres);
+    if(split){
+      locres.chunks.forEach(function(chunk){
+        chunk.parts.forEach(function(part){
+          part.line = part.oldline;
+        });
+      });
+    }
+  }
+  locres.chunks = locres.oldchunks;
+  delete locres.oldchunks;
+  locres.chunks.forEach(function(chunk){
+    chunk.parts = chunk.oldparts;
+    delete chunk.oldparts;
+    chunk.parts.forEach(function(part){
+      part.line = part.oldline;
+      delete part.oldline;
+    });
+  });
+  return text;
+};
+
+function locres_load(file,cb){
+  stream_reader(file,function(stream){
+    try{
+      var head = read_header(stream);
+      var count = locres_number(stream);
+      var chunks = [];
+      while(--count>=0)
+        chunks.push(read_chunk(stream));
+      var lines = read_lines(stream);
+      stream.free();
+      stream = null;
+      merge_lines(chunks,lines);
+      return cb({
+        name: file.name,
+        head: head,
+        chunks: chunks,
+      });
+    }catch(e){
+      console.error(e);
+      cb(null);
+    }
+  });
+};
+
+function read_header(stream){
+  stream.seek(0);
+  stream.skip(4);
+  var one = locres_number(stream);
+  stream.skip(13);
+  var two = locres_number(stream);
+  var head = '';
+  stream.seek(0);
+  if(one||!two){
+    head = locres_binary(stream,17);
+    stream.skip(8);
+  }
+  return head;
+}
+
+function read_lines(stream){
+  var lines = [];
+  if(stream.skip(0))
+    return lines;
+  var count = locres_number(stream);
+  while(--count>=0)
+    lines.push(locres_string(stream));
+  return lines;
+};
+
+function read_chunk(stream){
+  var name = locres_string(stream);
+  var count = locres_number(stream);
+  var parts = [];
+  while(--count>=0)
+    parts.push(read_part(stream));
+  return {
+    name: name,
+    parts: parts,
+  };
+};
+
+function read_part(stream){
+  var key = locres_string(stream);
+  var id = locres_binary(stream,4);
+  var number = locres_number(stream);
+  var line = false;
+  if(number<0){
+    line = locres_string(stream,number);
+    number = -1;
+  }
+  return {
+    key: key,
+    id: id,
+    number: number,
+    line: line,
+  };
+  parts.push(part);
+};
+
+function merge_lines(chunks,lines){
+  chunks.forEach(function(chunk){
+    var pool = Object.create(null);
+    chunk.parts = chunk.parts.filter(function(part){
+      if(pool[part.key])
+        return false;
+      pool[part.key] = true;
+      if(part.line!==false)
+        return true;
+      if(part.number<0||part.number>=lines.length)
+        return false;
+      part.line = lines[part.number];
+      return true;
+    });
+  });
+};
+
+function split_lines(chunks){
+  var pool = Object.create(null);
+  var lines = [];
+  chunks.forEach(function(chunk){
+    var keys = Object.create(null);
+    chunk.parts.forEach(function(part){
+      keys[part.key] = part;
+    });
+    chunk.parts = chunk.parts.filter(function(part){
+      return keys[part.key] == part;
+    });
+    chunk.parts.forEach(function(part){
+      if(!pool[part.line]){
+        lines.push(part.line);
+        pool[part.line] = lines.length;
+      }
+      part.number = pool[part.line]-1;
+    });
+  });
+  return lines;
+};
+
+function locres_save(locres){
+  var lines = split_lines(locres.chunks);
+  var buffers = [null];
+  locres.chunks.forEach(function(chunk){
+    buffers.push(save_chunk(chunk,!!locres.head));
+  });
+  buffers[0] = save_header(buffers,locres.head);
+  if(locres.head)
+    buffers.push(save_lines(lines));
+  var blob = new Blob(buffers,{type:'application/octet-stream'});
+  blob.name = locres.name;
+  return blob;
+};
+
+function save_lines(lines){
+  var size = lines.reduce(function(size,line){
+    return size+locres_strlen(line,-1);
+  },4);
+  var ab = new ArrayBuffer(size);
+  var dv = new DataView(ab);
+  var off = locres_writenum(dv,0,lines.length);
+  if(lines.reduce(function(off,line){
+    return locres_writestr(dv,off,line,-1);
+  },off)!=size)
+    return null;
+  return ab;
+};
+
+function save_chunk(chunk,list){
+  var size;
+  if(chunk.name)
+    size = locres_strlen(chunk.name,-1);
+  else
+    size = 4;
+  size = chunk.parts.reduce(function(size,part){
+    return size+locres_strlen(part.key,-1) +
+      (list ? 8 : 4+locres_strlen(part.line,0));
+  },size+4);
+  var ab = new ArrayBuffer(size);
+  var dv = new DataView(ab);
+  var off = 0;
+  off = locres_writestr(dv,off,chunk.name,-1);
+  off = locres_writenum(dv,off,chunk.parts.length);
+  off = chunk.parts.reduce(function(off,part){
+    off = locres_writestr(dv,off,part.key,-1);
+    off = write_hex(dv,off,part.id);
+    if(list)
+      off = locres_writenum(dv,off,part.number);
+    else
+      off = locres_writestr(dv,off,part.line,0);
+    return off;
+  },off);
+  if(off!=size)
+    throw new Error('how? '+off+','+size);
+  return ab;
+};
+
+function save_header(chunk_buffers,header){
+  var cnt = 0;
+  var size = chunk_buffers.reduce(function(size,buffer){
+    if(!buffer)
+      return size;
+    cnt++;
+    return size+buffer.byteLength;
+  },29);
+  var ab,dv;
+  if(header.length!=17*2){
+    ab = new ArrayBuffer(4);
+    dv = new DataView(ab);
+    locres_writenum(dv,0,cnt);
+    return ab;
+  }
+  var off = 0;
+  ab = new ArrayBuffer(29);
+  dv = new DataView(ab);
+  off = write_hex(dv,off,header);
+  off = locres_writenum(dv,off,size);
+  off = locres_writenum(dv,off,0);
+  off = locres_writenum(dv,off,cnt);
+  return ab;  
+};
+
+function locres_export(locres){
+  var res = [];
+  res.push('<FILE> "'+escape_export(locres.name)+'" ('+locres.head+')\n');
+  locres.chunks.forEach(function(chunk){
+    res.push('\n<NAME> "'+escape_export(chunk.name)+'":\n');
+    var pool = Object.create(null);
+    var take = [];
+    chunk.parts.forEach(function(part){
+      if(pool[part.line])
+        pool[part.line].push(part);
+      else{
+        pool[part.line] = [part];
+        take.push(part.line);
+      }
+    });
+    take.forEach(function(line){
+      pool[line].forEach(function(part){
+        res.push('<TEXT> "'+escape_export(part.key)+'" ('+part.id+')');
+      });
+      trans_export(line).forEach(function(text){
+        res.push('"'+escape_export(text)+'"');
+      });
+      res.push('');
+    });
+  });
+  return '\n'+res.join('\n')+'\n\n';
+};
+
+function locres_import(text){
+  var reg_name = /<name>/gi;
+  var reg_text = /<text>/gi;
+  var reg_quote = /^\s*"([^"]*)"\s*\(([^)]*)\)([^\0]*)$/;
+  var reg_colon = /^\s*"([^"]*)"\s*:?([^\0]*)$/;
+  var reg_line = /"([^"]*)"/g;
+  var match,files,chunks,parts,texts,line,back;
+  files = [];
+  text.replace(/\0/g,'').replace(/<file>/gi,'\0').split('\0').forEach(function(file,index){
+    if(!index)
+      return;
+    match = file.match(reg_quote);
+    if(!match)
+      return;
+    chunks = [];
+    files.push({
+      name: escape_import(match[1]),
+      head: escape_import(match[2]),
+      chunks: chunks,
+    });
+    match[3].replace(reg_name,'\0').split('\0').forEach(function(chunk,index){
+      if(!index)
+        return;
+      match = chunk.match(reg_colon);
+      if(!match)
+        return;
+      parts = [];
+      chunks.push({
+        name: escape_import(match[1]),
+        parts: parts,
+      });
+      back = [];
+      match[2].replace(reg_text,'\0').split('\0').forEach(function(part,index){
+        if(!index)
+          return;
+        match = part.match(reg_quote);
+        if(!match)
+          return;
+        texts = [];
+        match[3].replace(reg_line,function(line,text){
+          texts.push(escape_import(text));
+        });
+        line = trans_import(texts);
+        back.push({
+          key: escape_import(match[1]),
+          id: escape_import(match[2]),
+          line: line,
+          number: -1,
+        });
+        if(line){
+          back.forEach(function(part){
+            part.line = line;
+            parts.push(part);
+          });
+          back = [];
+        };
+      });
+    });
+  });
+  return locres_translation(files);
+};
+
+function locres_translation(files){
+  var pool,bro;
+  pool = Object.create(null);
+  files = files.filter(function(file){
+    if(!pool[file.name])
+      pool[file.name] = file;
+    else{
+      bro = pool[file.name];
+      file.chunks.forEach(function(chunk){
+        bro.chunks.push(chunk);
+      });
+      return false;
+    }
+    return true;
+  });
+  files.forEach(function(file){
+    pool = Object.create(null);
+    file.chunks = file.chunks.filter(function(chunk){
+      if(!pool[chunk.name])
+        pool[chunk.name] = chunk;
+      else{
+        bro = pool[chunk.name];
+        chunk.parts.forEach(function(part){
+          bro.parts.push(part);
+        });
+        return false;
+      }
+      return true;
+    });
+    file.chunks.forEach(function(chunk){
+      pool = Object.create(null);
+      chunk.parts = chunk.parts.filter(function(part){
+        if(!pool[part.key])
+          pool[part.key] = part;
+        else{
+          bro = pool[part.key];
+          bro.line = trans_join(bro.line,part.line);
+          if(bro.id!=part.id){
+            part.line = bro.line;
+            return true;
+          }
+          return false;
+        }
+        return true;
+      });
+    });
+  });
+  return files;
+};
+
+function escape_export(text){
+  return text.replace(/(\r\n)|[<>\t"\0]|/g,function(ch){
+    switch(ch){
+      case '\r\n': return '<cf>';
+      case '<': return '<lt>';
+      case '>': return '<gt>';
+      case '\t': return '<tab>';
+      case '"': return '<q>';
+      case '\0': return '<nul>';
+      default: return ch;
+    }
+  }).replace(/[\x01-\x1f]/g,function(ch){
+    switch(ch){
+      case '\r': return '<cr>';
+      case '\n': return '<lf>';
+      default: return '<$'+byte2hex(ch.charCodeAt(0))+'>';
+    }
+  });
+};
+
+function escape_import(text){
+  return text.replace(/<(?:\$([0-9a-fA-F][0-9a-fA-F])|[^>]+)>/g,function(ch,pt){
+    if(pt)
+      return String.fromCharCode(parseInt(pt));
+    switch(ch.toLowerCase()){
+      case '<cf>': return '\r\n';
+      case '<tab>': return '\t';
+      case '<q>': return '"';
+      case '<cr>': return '\r';
+      case '<lf>': return '\n';
+      case '<nul>': return '\0';
+      case '<lt>': return '<';
+      case '<gt>': return '>';
+      default: return ch;
+    }
+  });
+};
+
+function locres_binary(stream,bytes){
+  var arr = stream.read(bytes);
+  return read_hex(arr2view(arr),0,bytes);
+};
+
+function locres_number(stream){
+  var arr = stream.read(4);
+  return arr2view(arr).getInt32(0,true);
+};
+
+function trans_export(line){
+  return line.split('\0').reverse();
+};
+
+function trans_import(arr){
+  return arr.reverse().join('\0');
+};
+
+function trans_join(prev,next){
+  var a = trans_export(prev);
+  var b = trans_export(next);
+  b = b.filter(function(line){
+    return a.indexOf(line)<0;
+  });
+  return trans_import(a.concat(b));
+};
+
+function locres_string(stream,size){
+  if(!size)
+    size = locres_number(stream);
+  if(size>0){
+    var data = stream.read(size);
+    return fix_string((new TextDecoder()).decode(data));
+  }
+  if(!size)
+    return '';
+  size =- size;
+  var data = stream.read(size<<1);
+  var utf = arr2view(data);
+  var s = '';
+  for(var i=0; i<size; i++)
+    s += String.fromCharCode(utf.getUint16(i<<1,true));
+  return fix_string(s);
+};
+
+function fix_string(str){
+  if(!str.length)
+    return '';
+  if(!str.charCodeAt(str.length-1))
+    return str.substring(0,str.length-1);
+  return str;
+};
+
+function locres_strlen(str,utf8){
+  if(!str)
+    return 4;
+  if(utf8<0)
+    utf8 = str.match(/^[ -~\t\n\r]+$/) ? 1 : -1;
+  if(utf8>0)
+    return 4+(new TextEncoder()).encode(str).length+1;
+  return 4+(str.length+1)*2;
+};
+
+function locres_writestr(view,offset,str,utf8){
+  if(!str)
+    return locres_writenum(view,offset,0);
+  var size = str.length+1;
+  if(utf8<0)
+    utf8 = str.match(/^[ -~\t\n\r]+$/) ? 1 : -1;
+  if(utf8>0){
+    var buf = (new TextEncoder()).encode(str);
+    view.setInt32(offset,buf.length+1,true);
+    offset += 4;
+    for(var i=0,n=buf.length; i<n; i++){
+      view.setUint8(offset,buf[i]);
+      offset++;
+    }
+    view.setUint8(offset,0,true);
+    offset ++;
+  }else{
+    view.setInt32(offset,-size,true);
+    offset += 4;
+    for(var i=0,n=str.length; i<n; i++){
+      view.setUint16(offset,str.charCodeAt(i),true);
+      offset += 2;
+    }
+    view.setUint16(offset,0,true);
+    offset += 2;
+  }
+  return offset;
+};
+
+function locres_writenum(view,offset,value){
+  view.setUint32(offset,value,true);
+  return offset+4;
+};
+
+function read_file(file,offset,count,cb){
+  var fr = new FileReader();
+  fr.onload = function(event){
+    cb(event.target.result);
+  };
+  fr.readAsArrayBuffer(file.slice(offset,offset+count));
+};
+
+function int2hex(val){
+  var ab = new ArrayBuffer(4);
+  var dv = new DataView(ab);
+  dv.setUint32(0,val,true);
+  return read_hex(dv,0,4);
+};
+
+function read_hex(view,offset,count){
+  var s = '';
+  for(var i=0,j=offset; i<count; i++,j++)
+    s += byte2hex(view.getUint8(j));
+  return s;
+};
+
+function write_hex(view,offset,str){
+  var none = str.replace(/[0-9a-f][0-9a-f]/g,function(b){
+    view.setUint8(offset++,window.parseInt(b,16));
+    return '';
+  });
+  if(none!='')
+    throw new Error('none?');
+  return offset;
+};
+
+function arr2view(arr){
+  return new DataView(arr.buffer,arr.byteOffset);
+};
+
+function byte2hex(val){
+  if(val<16)
+    return '0'+val.toString(16);
+  return val.toString(16);
+};
+
+function stream_reader(blob,cb){
+  var fr = new FileReader();
+  fr.onload = function(event){
+    cb({
+      skip: function(count){
+        if(count<1)
+          count = 0;
+        this._offset += count;
+        if(this._offset>=this._size){
+          this._offset = this._size;
+          return true;
+        }
+        return false;
+      },
+      read: function(count){
+        if(this._offset+count>this._size)
+          count = this._size-this._offset;
+        if(count<1)
+          return new Uint8Array(0);
+        this._offset += count;
+        return new Uint8Array(this._buffer,this._offset-count,count);
+      },
+      pos: function(){
+        return this._offset;
+      },
+      seek: function(offset){
+        if(offset<1)
+          this._offset = 0;
+        if(offset>=this._size)
+          this._offset = this._size;
+        this._offset = offset;
+      },
+      free: function(){
+        this._buffer = null;
+        this._offset = 0;
+        this._size = -1;
+        this.skip = null;
+        this.read = null;
+        this.pos = null;
+        this.seek = null;
+        this.free = null;
+      },
+      _offset: 0,
+      _buffer: event.target.result,
+      _size: blob.size,
+    });
+  };
+  fr.readAsArrayBuffer(blob);
+};
+
+</script>
+
+</body>
+</html>
